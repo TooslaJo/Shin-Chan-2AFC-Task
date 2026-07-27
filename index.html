@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>蠟筆小新最討厭角色 2AFC 測驗</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f4f6f8; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    h2 { text-align: center; color: #d9534f; margin-top: 0; }
+    .step { display: none; }
+    .active { display: block; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, select, textarea { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+    button { width: 100%; padding: 14px; background: #d9534f; color: white; border: none; border-radius: 8px; font-size: 18px; margin-top: 20px; font-weight: bold; cursor: pointer; }
+    button:active { background: #c9302c; }
+    
+    /* 2AFC 樣式 */
+    .progress-bar { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+    .progress-fill { height: 100%; background: #d9534f; width: 0%; transition: width 0.3s; }
+    .choice-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    .choice-btn { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 20px; font-size: 20px; font-weight: bold; color: #495057; transition: all 0.2s; }
+    .choice-btn:active { background: #ffe3e3; border-color: #d9534f; color: #d9534f; }
+    
+    /* 結果頁 */
+    .rank-box { background: #fff5f5; border: 1px solid #ffe3e3; padding: 15px; border-radius: 10px; margin-top: 15px; }
+    .rank-item { font-size: 18px; margin: 8px 0; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 階段一：人口學資料 -->
+  <div id="step-demo" class="step active">
+    <h2>蠟筆小新角色問卷</h2>
+    <p style="text-align: center; color: #666;">請先填寫基本資料（約需 3 分鐘）</p>
+    
+    <label>年齡</label>
+    <input type="number" id="age" placeholder="例如：24" required>
+    
+    <label>生理性別</label>
+    <select id="gender">
+      <option value="">請選擇</option>
+      <option value="男">男</option>
+      <option value="女">女</option>
+      <option value="其他">其他</option>
+    </select>
+    
+    <label>MBTI (若不知道可填無)</label>
+    <input type="text" id="mbti" placeholder="例如：INTP">
+    
+    <button onclick="startExperiment()">開始比較 (共 45 題)</button>
+  </div>
+
+  <!-- 階段二：2AFC 測驗 -->
+  <div id="step-task" class="step">
+    <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+    <p style="text-align:center; font-size: 14px; color: #777;">請點選你【比較討厭】的角色：</p>
+    <div style="text-align:center; font-weight:bold; color: #d9534f;" id="question-count">1 / 45</div>
+    
+    <div class="choice-container">
+      <button class="choice-btn" id="btn-left" onclick="makeChoice(0)">角色 A</button>
+      <button class="choice-btn" id="btn-right" onclick="makeChoice(1)">角色 B</button>
+    </div>
+  </div>
+
+  <!-- 階段三：結果呈現與簡答 -->
+  <div id="step-result" class="step">
+    <h2>你的測試結果</h2>
+    <p>根據你的選擇，你最討厭的前三名角色是：</p>
+    
+    <div class="rank-box">
+      <div class="rank-item" style="color: #d9534f;">🥇 第一名：<span id="top1"></span></div>
+      <div class="rank-item" style="color: #e67e22;">🥈 第二名：<span id="top2"></span></div>
+      <div class="rank-item" style="color: #f1c40f;">🥉 第三名：<span id="top3"></span></div>
+    </div>
+
+    <label for="reason">簡答題：可以聊聊為什麼討厭這幾位角色嗎？</label>
+    <textarea id="reason" rows="4" placeholder="寫下你的原因..."></textarea>
+    
+    <button onclick="submitData()">送出問卷並完成</button>
+  </div>
+
+  <!-- 階段四：感謝頁 -->
+  <div id="step-thanks" class="step" style="text-align: center;">
+    <h2>感謝你的參與！</h2>
+    <p>你的資料已成功送出。</p>
+  </div>
+</div>
+
+<script>
+  // 1. 設定角色名單
+  const characters = ["美冴", "夢冴", "正男", "蜜琪", "席林", "隔壁大嬸", "四郎", "紅蠍子隊龍子", "小愛", "黑磯"];
+  
+  // 2. 統計分數矩陣
+  let scores = {};
+  characters.forEach(c => scores[c] = 0);
+  
+  // 3. 建立 C10取2 (45 pairs)
+  let pairs = [];
+  for (let i = 0; i < characters.length; i++) {
+    for (let j = i + 1; j < characters.length; j++) {
+      pairs.push([characters[i], characters[j]]);
+    }
+  }
+  
+  // 4. 洗牌演算法 (Randomize pairs & left/right position)
+  pairs.sort(() => Math.random() - 0.5);
+  pairs = pairs.map(pair => Math.random() > 0.5 ? [pair[1], pair[0]] : pair);
+
+  let currentTrial = 0;
+  let top3Results = [];
+
+  function startExperiment() {
+    if(!document.getElementById('age').value || !document.getElementById('gender').value) {
+      alert("請填寫年齡與生理性別");
+      return;
+    }
+    document.getElementById('step-demo').classList.remove('active');
+    document.getElementById('step-task').classList.add('active');
+    showTrial();
+  }
+
+  function showTrial() {
+    if (currentTrial >= pairs.length) {
+      showResults();
+      return;
+    }
+    // 更新進度
+    document.getElementById('progress').style.width = ((currentTrial / pairs.length) * 100) + '%';
+    document.getElementById('question-count').innerText = `${currentTrial + 1} / ${pairs.length}`;
+    
+    // 設定按鈕文字
+    document.getElementById('btn-left').innerText = pairs[currentTrial][0];
+    document.getElementById('btn-right').innerText = pairs[currentTrial][1];
+  }
+
+  function makeChoice(selectedIndex) {
+    // 得分累加 (選擇的角色 +1 分)
+    const chosenCharacter = pairs[currentTrial][selectedIndex];
+    scores[chosenCharacter] += 1;
+    
+    currentTrial++;
+    showTrial();
+  }
+
+  function showResults() {
+    document.getElementById('step-task').classList.remove('active');
+    document.getElementById('step-result').classList.add('active');
+
+    // 排序計算 Top 3
+    let sortedChars = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+    top3Results = sortedChars.slice(0, 3);
+
+    document.getElementById('top1').innerText = top3Results[0];
+    document.getElementById('top2').innerText = top3Results[1];
+    document.getElementById('top3').innerText = top3Results[2];
+  }
+
+  function submitData() {
+    // ⚠️ 請替換為你的 Google Form 連結 (結尾要改為 /formResponse)
+    const formActionURL = "https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse";
+    
+    // ⚠️ 請替換為你 Google Form 各題目的 entry.XXXXX ID
+    const formData = new FormData();
+    formData.append("entry.111111111", document.getElementById('age').value);
+    formData.append("entry.222222222", document.getElementById('gender').value);
+    formData.append("entry.333333333", document.getElementById('mbti').value || "無");
+    formData.append("entry.444444444", top3Results[0]);
+    formData.append("entry.555555555", top3Results[1]);
+    formData.append("entry.666666666", top3Results[2]);
+    formData.append("entry.777777777", document.getElementById('reason').value);
+    formData.append("entry.888888888", JSON.stringify(scores)); // 儲存所有角色最終得分狀況
+
+    // 送出資料 (使用 no-cors 避免跨網域阻擋)
+    fetch(formActionURL, {
+      method: "POST",
+      mode: "no-cors",
+      body: formData
+    }).then(() => {
+      document.getElementById('step-result').classList.remove('active');
+      document.getElementById('step-thanks').classList.add('active');
+    }).catch(err => {
+      alert("送出失敗，請重試");
+    });
+  }
+</script>
+
+</body>
+</html>
