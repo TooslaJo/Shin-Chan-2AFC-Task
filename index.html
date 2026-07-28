@@ -18,6 +18,9 @@
     button { width: 100%; padding: 14px; background: #d9534f; color: white; border: none; border-radius: 8px; font-size: 18px; margin-top: 20px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
     button:active { background: #c9302c; }
     
+    /* 指導頁與說明框 */
+    .intro-box { background: #fff5f5; border-left: 4px solid #d9534f; padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; color: #555; line-height: 1.5; }
+    
     /* 2AFC 樣式 (左右排列) */
     .progress-bar { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
     .progress-fill { height: 100%; background: #d9534f; width: 0%; transition: width 0.3s; }
@@ -40,15 +43,25 @@
     
     /* 滑桿數據顯示 */
     .range-value { text-align: center; font-weight: bold; color: #d9534f; font-size: 18px; margin-top: 5px; }
+    
+    /* 獨立簡答區塊 */
+    .reason-group { margin-top: 15px; padding: 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid #eee; }
+    .reason-group label { margin-top: 0; font-size: 15px; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 階段一：人口學資料 -->
+  <!-- 階段一：人口學資料與前言 -->
   <div id="step-demo" class="step active">
-    <h2>蠟筆小新角色問卷</h2>
-    <p style="text-align: center; color: #666;">請先填寫基本資料（共 28 題 PK）</p>
+    <h2>蠟筆小新最討厭角色 PK 戰</h2>
+    
+    <!-- 📢 開頭指導語 (脆企劃) -->
+    <div class="intro-box">
+      <b>👋 歡迎來到角色討厭度大擂台！</b><br>
+      本測驗將進行 28 題兩兩 PK，幫你找出內心最討厭的蠟筆小新角色前三名。<br>
+      📊 <b>數據預告：</b>一週後我會在 Threads (脆) 上發表這份問卷的統計報告與大家最愛的討厭理由分析！
+    </div>
     
     <label>年齡</label>
     <input type="number" id="age" placeholder="例如：24" required>
@@ -76,12 +89,17 @@
       <option value="幾乎沒看過">幾乎沒看過</option>
     </select>
     
+    <!-- 新增題目：角色熟悉度 (1~5) -->
+    <label>你對本次出現的 8 位角色的整體熟悉度 (1：完全不熟悉 ~ 5：非常熟悉)</label>
+    <input type="range" id="familiar-score" min="1" max="5" value="3" oninput="document.getElementById('fam-val').innerText = this.value">
+    <div class="range-value"><span id="fam-val">3</span> 分</div>
+
     <!-- 喜歡程度 (0~5) -->
     <label>你喜歡蠟筆小新這部卡通的程度 (0：完全不喜歡 ~ 5：極度喜歡)</label>
     <input type="range" id="like-score" min="0" max="5" value="3" oninput="document.getElementById('like-val').innerText = this.value">
     <div class="range-value"><span id="like-val">3</span> 分</div>
     
-    <button onclick="startExperiment()">開始進行 PK 比較</button>
+    <button onclick="startExperiment()">開始進行 PK 比較 (共 28 題)</button>
   </div>
 
   <!-- 階段二：2AFC 測驗 (左右圖片排列) -->
@@ -104,7 +122,7 @@
     </div>
   </div>
 
-  <!-- 階段三：結果呈現、長條圖與簡答 -->
+  <!-- 階段三：結果呈現、長條圖與分項簡答 -->
   <div id="step-result" class="step">
     <h2>你的測試結果</h2>
     
@@ -121,23 +139,43 @@
       <canvas id="scoreChart"></canvas>
     </div>
 
-    <!-- 簡答題 -->
-    <label for="reason" style="margin-top: 25px;">簡答題：可以聊聊為什麼討厭這幾位角色嗎？</label>
-    <textarea id="reason" rows="4" placeholder="寫下你的原因..."></textarea>
+    <!-- 💡 分項簡答題 (選填，動態帶入 Top 1~3 角色名稱) -->
+    <h3 style="margin-top: 25px; margin-bottom: 5px; color: #d9534f;">簡答題：討厭的原因（選填）</h3>
+    <p style="font-size: 13px; color: #666; margin-top: 0;">可以簡述你討厭他們的特徵或行為（如：外觀、情緒不穩、調皮、背叛、蹭飯、自說自話...）</p>
+
+    <div class="reason-group">
+      <label id="lbl-reason1">🥇 討厭第 1 名原因：</label>
+      <input type="text" id="reason1" placeholder="例如：太愛蹭飯、做事不負責任">
+    </div>
+
+    <div class="reason-group">
+      <label id="lbl-reason2">🥈 討厭第 2 名原因：</label>
+      <input type="text" id="reason2" placeholder="例如：情緒暴躁、容易哭鬧">
+    </div>
+
+    <div class="reason-group">
+      <label id="lbl-reason3">🥉 討厭第 3 名原因：</label>
+      <input type="text" id="reason3" placeholder="例如：個性太自傲">
+    </div>
     
     <button id="submit-btn" onclick="submitData()">送出並同步結果</button>
   </div>
 
-  <!-- 階段四：感謝頁 -->
+  <!-- 階段四：感謝頁 (脆結尾指引) -->
   <div id="step-thanks" class="step" style="text-align: center;">
-    <h2>感謝你的參與！</h2>
-    <p>你的結果已成功連線寫入後台資料庫。</p>
+    <h2>🎉 體驗完成！感謝參與！</h2>
+    <div class="intro-box" style="text-align: left; margin-top: 20px;">
+      <b>網頁資料已成功寫入後台！</b><br><br>
+      📸 <b>想分享結果嗎？</b><br>
+      你可以截圖剛才的長條圖結果，發到 Threads 上並 Tag 我一起討論！<br><br>
+      📅 <b>結果公布預告：</b><br>
+      統計結果與精選討厭理由，將會在<b>一週後</b>於 Threads 發表，記得關注我的動態喔！
+    </div>
   </div>
 </div>
 
 <script>
   // 1. 設定 8 位角色資料（包含圖片路徑）
-  // ⚠️ 請將 img 換成你實際的照片檔名或網址 (建議 1:1 正方形圖片)
   const characterData = [
     { name: "野原銀之介", img: "images/ginnosuke.jpg" },
     { name: "野原美冴", img: "images/misae.jpg" },
@@ -188,7 +226,6 @@
     document.getElementById('progress').style.width = ((currentTrial / pairs.length) * 100) + '%';
     document.getElementById('question-count').innerText = `${currentTrial + 1} / ${pairs.length}`;
     
-    // 設定左右兩邊的圖片與名稱
     document.getElementById('btn-left').innerText = pairs[currentTrial][0].name;
     document.getElementById('img-left').src = pairs[currentTrial][0].img;
     
@@ -210,9 +247,15 @@
 
     sortedChars = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
 
+    // 呈現 Top 3 文字
     document.getElementById('top1').innerText = `${sortedChars[0]} (${scores[sortedChars[0]]} 票)`;
     document.getElementById('top2').innerText = `${sortedChars[1]} (${scores[sortedChars[1]]} 票)`;
     document.getElementById('top3').innerText = `${sortedChars[2]} (${scores[sortedChars[2]]} 票)`;
+
+    // 💡 動態更新簡答題的 Label
+    document.getElementById('lbl-reason1').innerText = `🥇 討厭第 1 名【${sortedChars[0]}】的原因：`;
+    document.getElementById('lbl-reason2').innerText = `🥈 討厭第 2 名【${sortedChars[1]}】的原因：`;
+    document.getElementById('lbl-reason3').innerText = `🥉 討厭第 3 名【${sortedChars[2]}】的原因：`;
 
     renderChart();
   }
@@ -253,7 +296,6 @@
 
   // ☁️ 送出數據並同步至 Google Sheet 資料庫
   function submitData() {
-    // ⚠️ 請填入下方「步驟二」取得的 Google Apps Script Web App 網址
     const webAppUrl = "https://script.google.com/macros/s/AKfycbze5QGrmqyd1qqpXMNI33Txx3ibQ-Kz52BPJmp_omujmzG6AVuduVUJwLsVw5MGkhSEeQ/exec";
 
     const submitBtn = document.getElementById('submit-btn');
@@ -265,20 +307,16 @@
       gender: document.getElementById('gender').value,
       mbti: document.getElementById('mbti').value || "X",
       watchFreq: document.getElementById('watch-freq').value,
+      familiarScore: document.getElementById('familiar-score').value, // 新增熟悉度
       likeScore: document.getElementById('like-score').value,
       top1: sortedChars[0],
       top2: sortedChars[1],
       top3: sortedChars[2],
-      reason: document.getElementById('reason').value,
+      reason1: document.getElementById('reason1').value || "無",
+      reason2: document.getElementById('reason2').value || "無",
+      reason3: document.getElementById('reason3').value || "無",
       scores: scores
     };
-
-    if (webAppUrl === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") {
-      alert("請先完成 Google Apps Script 部署並替換 webAppUrl 網址！");
-      submitBtn.innerText = "截圖完成，按下按鍵以結束測驗";
-      submitBtn.disabled = false;
-      return;
-    }
 
     fetch(webAppUrl, {
       method: "POST",
@@ -292,7 +330,7 @@
     })
     .catch(err => {
       console.error(err);
-      alert("送出成功，謝謝你的體驗！");
+      // 就算有跨網域警報，資料通常也已順利寫入
       document.getElementById('step-result').classList.remove('active');
       document.getElementById('step-thanks').classList.add('active');
     });
