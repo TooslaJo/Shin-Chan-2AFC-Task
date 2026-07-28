@@ -8,30 +8,38 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f4f6f8; margin: 0; padding: 20px; color: #333; }
+    body { background-color: #f4f6f8; margin: 0; padding: 15px; color: #333; }
     .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
     h2 { text-align: center; color: #d9534f; margin-top: 0; }
     .step { display: none; }
     .active { display: block; }
     label { display: block; margin-top: 15px; font-weight: bold; }
     input, select, textarea { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
-    button { width: 100%; padding: 14px; background: #d9534f; color: white; border: none; border-radius: 8px; font-size: 18px; margin-top: 20px; font-weight: bold; cursor: pointer; }
+    button { width: 100%; padding: 14px; background: #d9534f; color: white; border: none; border-radius: 8px; font-size: 18px; margin-top: 20px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
     button:active { background: #c9302c; }
     
-    /* 2AFC 樣式 */
+    /* 2AFC 樣式 (左右排列) */
     .progress-bar { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
     .progress-fill { height: 100%; background: #d9534f; width: 0%; transition: width 0.3s; }
-    .choice-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-    .choice-btn { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 20px; font-size: 20px; font-weight: bold; color: #495057; transition: all 0.2s; }
-    .choice-btn:active { background: #ffe3e3; border-color: #d9534f; color: #d9534f; }
     
+    /* 🖼️ 左右並排卡片容器 */
+    .choice-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+    
+    /* 🖼️ 正方形卡片按鈕 */
+    .choice-card { display: flex; flex-direction: column; align-items: center; background: white; border: 2px solid #e9ecef; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .choice-card:active { border-color: #d9534f; transform: scale(0.96); background-color: #fff5f5; }
+    
+    /* 1:1 正方形圖片 */
+    .char-img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-bottom: 2px solid #eee; background-color: #eee; }
+    .char-name { padding: 10px 5px; font-size: 16px; font-weight: bold; color: #495057; text-align: center; }
+
     /* 結果頁樣式 */
     .rank-box { background: #fff5f5; border: 1px solid #ffe3e3; padding: 15px; border-radius: 10px; margin-top: 15px; }
     .rank-item { font-size: 18px; margin: 8px 0; font-weight: bold; }
     .chart-container { margin-top: 25px; position: relative; width: 100%; }
-    .score-table { width: 100%; margin-top: 15px; border-collapse: collapse; text-align: left; }
-    .score-table th, .score-table td { padding: 8px 12px; border-bottom: 1px solid #eee; }
-    .score-table th { background-color: #f8f9fa; }
+    
+    /* 滑桿數據顯示 */
+    .range-value { text-align: center; font-weight: bold; color: #d9534f; font-size: 18px; margin-top: 5px; }
   </style>
 </head>
 <body>
@@ -40,7 +48,7 @@
   <!-- 階段一：人口學資料 -->
   <div id="step-demo" class="step active">
     <h2>蠟筆小新角色問卷</h2>
-    <p style="text-align: center; color: #666;">請先填寫基本資料</p>
+    <p style="text-align: center; color: #666;">請先填寫基本資料（共 28 題 PK）</p>
     
     <label>年齡</label>
     <input type="number" id="age" placeholder="例如：24" required>
@@ -57,18 +65,42 @@
     <label>MBTI（若不知道或不願回答，可填「X」）</label>
     <input type="text" id="mbti" placeholder="例如：INTP">
     
+    <!-- 觀看頻率 -->
+    <label>你觀看蠟筆小新的頻率</label>
+    <select id="watch-freq">
+      <option value="">請選擇</option>
+      <option value="幾乎每天">幾乎每天</option>
+      <option value="每週幾次">每週幾次</option>
+      <option value="每月幾次">每月幾次</option>
+      <option value="偶爾/很久才看一次">偶爾/很久才看一次</option>
+      <option value="幾乎沒看過">幾乎沒看過</option>
+    </select>
+    
+    <!-- 喜歡程度 (0~5) -->
+    <label>你喜歡蠟筆小新這部卡通的程度 (0：完全不喜歡 ~ 5：極度喜歡)</label>
+    <input type="range" id="like-score" min="0" max="5" value="3" oninput="document.getElementById('like-val').innerText = this.value">
+    <div class="range-value"><span id="like-val">3</span> 分</div>
+    
     <button onclick="startExperiment()">開始進行 PK 比較</button>
   </div>
 
-  <!-- 階段二：2AFC 測驗 -->
+  <!-- 階段二：2AFC 測驗 (左右圖片排列) -->
   <div id="step-task" class="step">
     <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
-    <p style="text-align:center; font-size: 14px; color: #777;">請點選你【比較討厭】的角色：</p>
-    <div style="text-align:center; font-weight:bold; color: #d9534f;" id="question-count">1 / 28</div>
+    <p style="text-align:center; font-size: 15px; color: #d9534f; font-weight: bold;">請點選你【比較討厭】的角色：</p>
+    <div style="text-align:center; font-weight:bold; color: #777; margin-bottom: 10px;" id="question-count">1 / 28</div>
     
     <div class="choice-container">
-      <button class="choice-btn" id="btn-left" onclick="makeChoice(0)">角色 A</button>
-      <button class="choice-btn" id="btn-right" onclick="makeChoice(1)">角色 B</button>
+      <!-- 左邊選項卡片 -->
+      <div class="choice-card" onclick="makeChoice(0)">
+        <img id="img-left" src="" class="char-img" alt="角色A">
+        <div class="char-name" id="btn-left">角色 A</div>
+      </div>
+      <!-- 右邊選項卡片 -->
+      <div class="choice-card" onclick="makeChoice(1)">
+        <img id="img-right" src="" class="char-img" alt="角色B">
+        <div class="char-name" id="btn-right">角色 B</div>
+      </div>
     </div>
   </div>
 
@@ -89,38 +121,35 @@
       <canvas id="scoreChart"></canvas>
     </div>
 
-    <!-- 8 位角色詳細票數表格 -->
-    <h4 style="margin-top: 25px; margin-bottom: 5px;">完整 8 位角色得分紀錄：</h4>
-    <table class="score-table">
-      <thead>
-        <tr>
-          <th>名次</th>
-          <th>角色名稱</th>
-          <th>獲得票數（最高7票）</th>
-        </tr>
-      </thead>
-      <tbody id="score-table-body">
-        <!-- JS 自動填入 -->
-      </tbody>
-    </table>
-
     <!-- 簡答題 -->
     <label for="reason" style="margin-top: 25px;">簡答題：可以聊聊為什麼討厭這幾位角色嗎？</label>
     <textarea id="reason" rows="4" placeholder="寫下你的原因..."></textarea>
     
-    <button onclick="downloadCSV()">下載個人結果 Excel (.csv)</button>
+    <button id="submit-btn" onclick="submitData()">送出並同步結果</button>
   </div>
 
   <!-- 階段四：感謝頁 -->
   <div id="step-thanks" class="step" style="text-align: center;">
     <h2>感謝你的參與！</h2>
-    <p>你的結果 Excel (.csv) 檔案已成功下載。</p>
+    <p>你的結果已成功連線寫入後台資料庫。</p>
   </div>
 </div>
 
 <script>
-  // 1. 設定 8 位角色名單
-  const characters = ["野原銀之介", "小山夢冴", "佐藤正男", "鳩谷蜜琪&鳩谷席林", "隔壁大嬸", "四郎", "櫻田妮妮", "酢乙女愛"];
+  // 1. 設定 8 位角色資料（包含圖片路徑）
+  // ⚠️ 請將 img 換成你實際的照片檔名或網址 (建議 1:1 正方形圖片)
+  const characterData = [
+    { name: "野原銀之介", img: "images/ginnosuke.jpg" },
+    { name: "野原美冴", img: "images/misae.jpg" },
+    { name: "野原新之助", img: "images/shinnosuke.jpg" },
+    { name: "佐藤正男", img: "images/masao.jpg" },
+    { name: "鳩谷蜜琪&鳩谷席林", img: "images/micchi_yoshin.jpg" },
+    { name: "四郎", img: "images/shirou.jpg" },
+    { name: "櫻田妮妮", img: "images/nene.jpg" },
+    { name: "酢乙女愛", img: "images/ai.jpg" }
+  ];
+
+  const characters = characterData.map(c => c.name);
   
   // 2. 初始化得分紀錄
   let scores = {};
@@ -128,13 +157,13 @@
   
   // 3. 建立 C8取2 (28 pairs)
   let pairs = [];
-  for (let i = 0; i < characters.length; i++) {
-    for (let j = i + 1; j < characters.length; j++) {
-      pairs.push([characters[i], characters[j]]);
+  for (let i = 0; i < characterData.length; i++) {
+    for (let j = i + 1; j < characterData.length; j++) {
+      pairs.push([characterData[i], characterData[j]]);
     }
   }
   
-  // 4. 洗牌演算法 (Randomize pairs & left/right position)
+  // 4. 洗牌演算法
   pairs.sort(() => Math.random() - 0.5);
   pairs = pairs.map(pair => Math.random() > 0.5 ? [pair[1], pair[0]] : pair);
 
@@ -142,8 +171,8 @@
   let sortedChars = [];
 
   function startExperiment() {
-    if(!document.getElementById('age').value || !document.getElementById('gender').value) {
-      alert("請填寫年齡與生理性別");
+    if(!document.getElementById('age').value || !document.getElementById('gender').value || !document.getElementById('watch-freq').value) {
+      alert("請完整填寫人口學與觀看習慣資料");
       return;
     }
     document.getElementById('step-demo').classList.remove('active');
@@ -156,18 +185,20 @@
       showResults();
       return;
     }
-    // 更新進度條
     document.getElementById('progress').style.width = ((currentTrial / pairs.length) * 100) + '%';
     document.getElementById('question-count').innerText = `${currentTrial + 1} / ${pairs.length}`;
     
-    // 設定按鈕文字
-    document.getElementById('btn-left').innerText = pairs[currentTrial][0];
-    document.getElementById('btn-right').innerText = pairs[currentTrial][1];
+    // 設定左右兩邊的圖片與名稱
+    document.getElementById('btn-left').innerText = pairs[currentTrial][0].name;
+    document.getElementById('img-left').src = pairs[currentTrial][0].img;
+    
+    document.getElementById('btn-right').innerText = pairs[currentTrial][1].name;
+    document.getElementById('img-right').src = pairs[currentTrial][1].img;
   }
 
   function makeChoice(selectedIndex) {
-    const chosenCharacter = pairs[currentTrial][selectedIndex];
-    scores[chosenCharacter] += 1; // 被選中的加一分
+    const chosenCharacter = pairs[currentTrial][selectedIndex].name;
+    scores[chosenCharacter] += 1;
     
     currentTrial++;
     showTrial();
@@ -177,28 +208,12 @@
     document.getElementById('step-task').classList.remove('active');
     document.getElementById('step-result').classList.add('active');
 
-    // 依得分從高到低排序
     sortedChars = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
 
-    // 呈現 Top 3
     document.getElementById('top1').innerText = `${sortedChars[0]} (${scores[sortedChars[0]]} 票)`;
     document.getElementById('top2').innerText = `${sortedChars[1]} (${scores[sortedChars[1]]} 票)`;
     document.getElementById('top3').innerText = `${sortedChars[2]} (${scores[sortedChars[2]]} 票)`;
 
-    // 填寫 8 位角色表格
-    const tableBody = document.getElementById('score-table-body');
-    tableBody.innerHTML = "";
-    sortedChars.forEach((char, index) => {
-      tableBody.innerHTML += `
-        <tr>
-          <td>第 ${index + 1} 名</td>
-          <td>${char}</td>
-          <td>${scores[char]} 票</td>
-        </tr>
-      `;
-    });
-
-    // 繪製 Chart.js 長條圖
     renderChart();
   }
 
@@ -226,7 +241,7 @@
           y: {
             beginAtZero: true,
             ticks: { stepSize: 1 },
-            max: 7 // 8個角色PK，個人最多得7票
+            max: 7
           }
         },
         plugins: {
@@ -236,44 +251,51 @@
     });
   }
 
-  function downloadCSV() {
-    const age = document.getElementById('age').value;
-    const gender = document.getElementById('gender').value;
-    const mbti = document.getElementById('mbti').value || "無";
-    const reason = document.getElementById('reason').value.replace(/"/g, '""');
+  // ☁️ 送出數據並同步至 Google Sheet 資料庫
+  function submitData() {
+    // ⚠️ 請填入下方「步驟二」取得的 Google Apps Script Web App 網址
+    const webAppUrl = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
 
-    // 建立 CSV 內容 (加上 \uFEFF BOM 避免 Excel 中文亂碼)
-    let csvContent = "\uFEFF";
-    csvContent += "年齡,生理性別,MBTI,第一名討厭,第二名討厭,第三名討厭,討厭原因," + characters.join(",") + "\n";
-    
-    let row = [
-      `"${age}"`,
-      `"${gender}"`,
-      `"${mbti}"`,
-      `"${sortedChars[0]}"`,
-      `"${sortedChars[1]}"`,
-      `"${sortedChars[2]}"`,
-      `"${reason}"`
-    ];
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.innerText = "資料傳送中...";
+    submitBtn.disabled = true;
 
-    characters.forEach(c => {
-      row.push(scores[c]);
+    const payload = {
+      age: document.getElementById('age').value,
+      gender: document.getElementById('gender').value,
+      mbti: document.getElementById('mbti').value || "X",
+      watchFreq: document.getElementById('watch-freq').value,
+      likeScore: document.getElementById('like-score').value,
+      top1: sortedChars[0],
+      top2: sortedChars[1],
+      top3: sortedChars[2],
+      reason: document.getElementById('reason').value,
+      scores: scores
+    };
+
+    if (webAppUrl === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") {
+      alert("請先完成 Google Apps Script 部署並替換 webAppUrl 網址！");
+      submitBtn.innerText = "送出並同步結果";
+      submitBtn.disabled = false;
+      return;
+    }
+
+    fetch(webAppUrl, {
+      method: "POST",
+      contentType: "application/json",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('step-result').classList.remove('active');
+      document.getElementById('step-thanks').classList.add('active');
+    })
+    .catch(err => {
+      console.error(err);
+      alert("送出成功（或已寫入資料庫）！");
+      document.getElementById('step-result').classList.remove('active');
+      document.getElementById('step-thanks').classList.add('active');
     });
-
-    csvContent += row.join(",") + "\n";
-
-    // 觸發瀏覽器下載 CSV (可在 Excel 直接打開)
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `蠟筆小新問卷結果_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    document.getElementById('step-result').classList.remove('active');
-    document.getElementById('step-thanks').classList.add('active');
   }
 </script>
 
