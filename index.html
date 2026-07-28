@@ -254,7 +254,7 @@
   // ☁️ 送出數據並同步至 Google Sheet 資料庫
   function submitData() {
     // ⚠️ 請填入下方「步驟二」取得的 Google Apps Script Web App 網址
-    const webAppUrl = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbze5QGrmqyd1qqpXMNI33Txx3ibQ-Kz52BPJmp_omujmzG6AVuduVUJwLsVw5MGkhSEeQ/exec";
 
     const submitBtn = document.getElementById('submit-btn');
     submitBtn.innerText = "資料傳送中...";
@@ -275,7 +275,7 @@
 
     if (webAppUrl === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") {
       alert("請先完成 Google Apps Script 部署並替換 webAppUrl 網址！");
-      submitBtn.innerText = "送出並同步結果";
+      submitBtn.innerText = "截圖完成，按下按鍵以結束測驗";
       submitBtn.disabled = false;
       return;
     }
@@ -292,7 +292,7 @@
     })
     .catch(err => {
       console.error(err);
-      alert("送出成功（或已寫入資料庫）！");
+      alert("送出成功，謝謝你的體驗！");
       document.getElementById('step-result').classList.remove('active');
       document.getElementById('step-thanks').classList.add('active');
     });
