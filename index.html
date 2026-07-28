@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>蠟筆小新最討厭角色 2AFC 測驗</title>
+  <!-- 引進 Chart.js 繪圖庫 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f4f6f8; margin: 0; padding: 20px; color: #333; }
@@ -23,9 +25,13 @@
     .choice-btn { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 20px; font-size: 20px; font-weight: bold; color: #495057; transition: all 0.2s; }
     .choice-btn:active { background: #ffe3e3; border-color: #d9534f; color: #d9534f; }
     
-    /* 結果頁 */
+    /* 結果頁樣式 */
     .rank-box { background: #fff5f5; border: 1px solid #ffe3e3; padding: 15px; border-radius: 10px; margin-top: 15px; }
     .rank-item { font-size: 18px; margin: 8px 0; font-weight: bold; }
+    .chart-container { margin-top: 25px; position: relative; width: 100%; }
+    .score-table { width: 100%; margin-top: 15px; border-collapse: collapse; text-align: left; }
+    .score-table th, .score-table td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+    .score-table th { background-color: #f8f9fa; }
   </style>
 </head>
 <body>
@@ -34,7 +40,7 @@
   <!-- 階段一：人口學資料 -->
   <div id="step-demo" class="step active">
     <h2>蠟筆小新角色問卷</h2>
-    <p style="text-align: center; color: #666;">請先填寫基本資料（約需 3 分鐘）</p>
+    <p style="text-align: center; color: #666;">請先填寫基本資料</p>
     
     <label>年齡</label>
     <input type="number" id="age" placeholder="例如：24" required>
@@ -45,19 +51,20 @@
       <option value="男">男</option>
       <option value="女">女</option>
       <option value="其他">其他</option>
+      <option value="不願回答">不願回答</option>
     </select>
     
-    <label>MBTI (若不知道可填無)</label>
+    <label>MBTI（若不知道或不願回答，可填「X」）</label>
     <input type="text" id="mbti" placeholder="例如：INTP">
     
-    <button onclick="startExperiment()">開始比較 (共 45 題)</button>
+    <button onclick="startExperiment()">開始進行 PK 比較</button>
   </div>
 
   <!-- 階段二：2AFC 測驗 -->
   <div id="step-task" class="step">
     <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
     <p style="text-align:center; font-size: 14px; color: #777;">請點選你【比較討厭】的角色：</p>
-    <div style="text-align:center; font-weight:bold; color: #d9534f;" id="question-count">1 / 45</div>
+    <div style="text-align:center; font-weight:bold; color: #d9534f;" id="question-count">1 / 28</div>
     
     <div class="choice-container">
       <button class="choice-btn" id="btn-left" onclick="makeChoice(0)">角色 A</button>
@@ -65,18 +72,40 @@
     </div>
   </div>
 
-  <!-- 階段三：結果呈現與簡答 -->
+  <!-- 階段三：結果呈現、長條圖與簡答 -->
   <div id="step-result" class="step">
     <h2>你的測試結果</h2>
-    <p>根據你的選擇，你最討厭的前三名角色是：</p>
     
+    <!-- Top 3 前三名 -->
     <div class="rank-box">
       <div class="rank-item" style="color: #d9534f;">🥇 第一名：<span id="top1"></span></div>
       <div class="rank-item" style="color: #e67e22;">🥈 第二名：<span id="top2"></span></div>
       <div class="rank-item" style="color: #f1c40f;">🥉 第三名：<span id="top3"></span></div>
     </div>
 
-    <label for="reason">簡答題：可以聊聊為什麼討厭這幾位角色嗎？</label>
+    <!-- 長條圖繪製區 -->
+    <div class="chart-container">
+      <h3 style="text-align: center; margin-bottom: 10px;">討厭指數長條圖 (勝出次數)</h3>
+      <canvas id="scoreChart"></canvas>
+    </div>
+
+    <!-- 8 位角色詳細票數表格 -->
+    <h4 style="margin-top: 25px; margin-bottom: 5px;">完整 8 位角色得分紀錄：</h4>
+    <table class="score-table">
+      <thead>
+        <tr>
+          <th>名次</th>
+          <th>角色名稱</th>
+          <th>獲得票數（最高7票）</th>
+        </tr>
+      </thead>
+      <tbody id="score-table-body">
+        <!-- JS 自動填入 -->
+      </tbody>
+    </table>
+
+    <!-- 簡答題 -->
+    <label for="reason" style="margin-top: 25px;">簡答題：可以聊聊為什麼討厭這幾位角色嗎？</label>
     <textarea id="reason" rows="4" placeholder="寫下你的原因..."></textarea>
     
     <button onclick="submitData()">送出問卷並完成</button>
@@ -85,19 +114,19 @@
   <!-- 階段四：感謝頁 -->
   <div id="step-thanks" class="step" style="text-align: center;">
     <h2>感謝你的參與！</h2>
-    <p>你的資料已成功送出。</p>
+    <p>你的資料已成功傳送。</p>
   </div>
 </div>
 
 <script>
-  // 1. 設定角色名單
-  const characters = ["美冴", "夢冴", "正男", "蜜琪", "席林", "隔壁大嬸", "四郎", "紅蠍子隊龍子", "小愛", "黑磯"];
+  // 1. 設定 8 位角色名單
+  const characters = ["美冴", "夢冴", "正男", "蜜琪/席林", "隔壁大嬸", "四郎", "紅蠍子隊龍子", "小愛"];
   
-  // 2. 統計分數矩陣
+  // 2. 初始化得分紀錄
   let scores = {};
   characters.forEach(c => scores[c] = 0);
   
-  // 3. 建立 C10取2 (45 pairs)
+  // 3. 建立 C8取2 (28 pairs)
   let pairs = [];
   for (let i = 0; i < characters.length; i++) {
     for (let j = i + 1; j < characters.length; j++) {
@@ -110,7 +139,7 @@
   pairs = pairs.map(pair => Math.random() > 0.5 ? [pair[1], pair[0]] : pair);
 
   let currentTrial = 0;
-  let top3Results = [];
+  let sortedChars = [];
 
   function startExperiment() {
     if(!document.getElementById('age').value || !document.getElementById('gender').value) {
@@ -127,7 +156,7 @@
       showResults();
       return;
     }
-    // 更新進度
+    // 更新進度條
     document.getElementById('progress').style.width = ((currentTrial / pairs.length) * 100) + '%';
     document.getElementById('question-count').innerText = `${currentTrial + 1} / ${pairs.length}`;
     
@@ -137,9 +166,8 @@
   }
 
   function makeChoice(selectedIndex) {
-    // 得分累加 (選擇的角色 +1 分)
     const chosenCharacter = pairs[currentTrial][selectedIndex];
-    scores[chosenCharacter] += 1;
+    scores[chosenCharacter] += 1; // 被選中的加一分
     
     currentTrial++;
     showTrial();
@@ -149,31 +177,81 @@
     document.getElementById('step-task').classList.remove('active');
     document.getElementById('step-result').classList.add('active');
 
-    // 排序計算 Top 3
-    let sortedChars = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
-    top3Results = sortedChars.slice(0, 3);
+    // 依得分從高到低排序
+    sortedChars = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
 
-    document.getElementById('top1').innerText = top3Results[0];
-    document.getElementById('top2').innerText = top3Results[1];
-    document.getElementById('top3').innerText = top3Results[2];
+    // 呈現 Top 3
+    document.getElementById('top1').innerText = `${sortedChars[0]} (${scores[sortedChars[0]]} 票)`;
+    document.getElementById('top2').innerText = `${sortedChars[1]} (${scores[sortedChars[1]]} 票)`;
+    document.getElementById('top3').innerText = `${sortedChars[2]} (${scores[sortedChars[2]]} 票)`;
+
+    // 填寫 8 位角色表格
+    const tableBody = document.getElementById('score-table-body');
+    tableBody.innerHTML = "";
+    sortedChars.forEach((char, index) => {
+      tableBody.innerHTML += `
+        <tr>
+          <td>第 ${index + 1} 名</td>
+          <td>${char}</td>
+          <td>${scores[char]} 票</td>
+        </tr>
+      `;
+    });
+
+    // 繪製 Chart.js 長條圖
+    renderChart();
+  }
+
+  function renderChart() {
+    const ctx = document.getElementById('scoreChart').getContext('2d');
+    const labels = sortedChars;
+    const dataValues = sortedChars.map(char => scores[char]);
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: '討厭得票數',
+          data: dataValues,
+          backgroundColor: 'rgba(217, 83, 79, 0.7)',
+          borderColor: 'rgba(217, 83, 79, 1)',
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+            max: 7 // 8個角色PK，個人最多得7票
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
   }
 
   function submitData() {
-    // ⚠️ 請替換為你的 Google Form 連結 (結尾要改為 /formResponse)
+    // ⚠️ 1. 請替換為你的 Google 表單連結 (結尾改為 /formResponse)
     const formActionURL = "https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse";
     
-    // ⚠️ 請替換為你 Google Form 各題目的 entry.XXXXX ID
+    // ⚠️ 2. 請將 entry.XXXXXXXX 換成用「預填連結」查出來的數字
     const formData = new FormData();
-    formData.append("entry.111111111", document.getElementById('age').value);
-    formData.append("entry.222222222", document.getElementById('gender').value);
-    formData.append("entry.333333333", document.getElementById('mbti').value || "無");
-    formData.append("entry.444444444", top3Results[0]);
-    formData.append("entry.555555555", top3Results[1]);
-    formData.append("entry.666666666", top3Results[2]);
-    formData.append("entry.777777777", document.getElementById('reason').value);
-    formData.append("entry.888888888", JSON.stringify(scores)); // 儲存所有角色最終得分狀況
+    formData.append("entry.111111111", document.getElementById('age').value);          // 年齡
+    formData.append("entry.222222222", document.getElementById('gender').value);       // 性別
+    formData.append("entry.333333333", document.getElementById('mbti').value || "無"); // MBTI
+    formData.append("entry.444444444", sortedChars[0]);                                // 第一名
+    formData.append("entry.555555555", sortedChars[1]);                                // 第二名
+    formData.append("entry.666666666", sortedChars[2]);                                // 第三名
+    formData.append("entry.777777777", document.getElementById('reason').value);       // 簡答原因
+    formData.append("entry.888888888", JSON.stringify(scores));                        // 8個角色所有得分JSON
 
-    // 送出資料 (使用 no-cors 避免跨網域阻擋)
+    // 發送資料至 Google Form
     fetch(formActionURL, {
       method: "POST",
       mode: "no-cors",
