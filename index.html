@@ -80,7 +80,7 @@
       <span>我已充分閱讀並同意以上敘述</span>
     </label>
 
-    <button id="btn-to-demo" onclick="goToStep('step-demo')" disabled>繼續進行問卷</button>
+    <button id="btn-to-demo" onclick="goToStep('step-demo')" disabled>繼續進行</button>
   </div>
 
   <!-- 階段二：人口學資料 -->
@@ -113,11 +113,11 @@
       <option value="幾乎沒看過">幾乎沒看過</option>
     </select>
     
-    <label>你對本次出現角色的整體熟悉度 (0：完全不熟悉 ~ 5：極度熟悉)</label>
+    <label>你對本次出現角色的整體熟悉度（0：完全不熟悉 ~ 5：極度熟悉）</label>
     <input type="range" id="familiar-score" min="0" max="5" value="3" oninput="document.getElementById('fam-val').innerText = this.value">
     <div class="range-value"><span id="fam-val">3</span> 分</div>
 
-    <label>你喜歡蠟筆小新這部卡通的程度 (0：完全不喜歡 ~ 5：極度喜歡)</label>
+    <label>你喜歡蠟筆小新這部卡通的程度（0：完全不喜歡 ~ 5：極度喜歡）</label>
     <input type="range" id="like-score" min="0" max="5" value="3" oninput="document.getElementById('like-val').innerText = this.value">
     <div class="range-value"><span id="like-val">3</span> 分</div>
     
@@ -349,7 +349,7 @@
       reason2: document.getElementById('reason2').value || "無",
       reason3: document.getElementById('reason3').value || "無",
       otherChar: document.getElementById('other-char').value || "無",
-      otherReason: document.getElementById('other-reason').value || "無"
+      otherReason: document.getElementById('other-reason').value || "無",
       scores: scores
     };
 
