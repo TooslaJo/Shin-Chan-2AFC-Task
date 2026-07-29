@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>蠟筆小新最討厭角色 2AFC 測驗</title>
-  <!-- 引進 Chart.js 繪圖庫 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -19,37 +18,26 @@
     button:active { background: #c9302c; }
     button:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
     
-    /* 指導頁與說明框 */
     .intro-box { background: #fff5f5; border-left: 4px solid #d9534f; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #444; line-height: 1.6; }
     .intro-box a { color: #d9534f; font-weight: bold; text-decoration: underline; }
     .consent-container { display: flex; align-items: center; gap: 10px; margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 1px solid #eee; cursor: pointer; }
     .consent-container input { width: 20px; height: 20px; cursor: pointer; }
-    .consent-container span { font-size: 15px; font-weight: bold; color: #333; }
     
-    /* 2AFC 樣式 (左右排列) */
     .progress-bar { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
     .progress-fill { height: 100%; background: #d9534f; width: 0%; transition: width 0.3s; }
     
-    /* 🖼️ 左右並排卡片容器 */
     .choice-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-    
-    /* 🖼️ 正方形卡片按鈕 */
     .choice-card { display: flex; flex-direction: column; align-items: center; background: white; border: 2px solid #e9ecef; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .choice-card:active { border-color: #d9534f; transform: scale(0.96); background-color: #fff5f5; }
     
-    /* 1:1 正方形圖片 */
     .char-img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-bottom: 2px solid #eee; background-color: #eee; }
     .char-name { padding: 10px 5px; font-size: 16px; font-weight: bold; color: #495057; text-align: center; }
 
-    /* 結果頁樣式 */
     .rank-box { background: #fff5f5; border: 1px solid #ffe3e3; padding: 15px; border-radius: 10px; margin-top: 15px; }
     .rank-item { font-size: 18px; margin: 8px 0; font-weight: bold; }
     .chart-container { margin-top: 25px; position: relative; width: 100%; }
-    
-    /* 滑桿數據顯示 */
     .range-value { text-align: center; font-weight: bold; color: #d9534f; font-size: 18px; margin-top: 5px; }
     
-    /* 獨立簡答區塊 */
     .reason-group { margin-top: 15px; padding: 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid #eee; }
     .reason-group label { margin-top: 0; font-size: 15px; }
   </style>
@@ -58,7 +46,7 @@
 
 <div class="container">
   
-  <!-- 階段一：指導頁與聲明同意 -->
+  <!-- 階段一：指導頁 -->
   <div id="step-intro" class="step active">
     <h2>蠟筆小新角色討厭排行大擂台</h2>
     
@@ -66,13 +54,14 @@
       <b>歡迎各位來到蠟筆小新角色討厭排行大擂台！</b><br><br>
       本測驗將進行 28 題兩兩 PK，幫你找出內心最討厭的蠟筆小新角色前三名。<br><br>
       📊 <b>數據預告：</b><br>
-      一週後我會在自己的 Threads 上（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>），發表這份問卷的統計報告與大家最愛的討厭理由分析！<br><br>
-      📌 <b>注意事項與聲明：</b><br>
-      本測驗絕不用於學術研究用途，僅供娛樂分享。後續資料將會妥善保管並僅使用於教學用途。<br><br>
-      <b>作者：</b>張良聖
+      一週後我會在自己的 Threads 上（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>），發表這份問卷的統計報告與心理距離分析！<br><br>
+      🛡️ <b>隱私與安全性聲明：</b><br>
+      • 本測驗建置於 <b>GitHub Pages</b> 開放平台，無任何惡意腳本。<br>
+      • 所蒐集之人口學資料僅用於<b>匿名統計與教學分析</b>，無個資外洩風險。<br>
+      • 本測驗非學術研究，僅供娛樂分享與教學用途。<br><br>
+      <b>作者：</b>張良聖（成大心理系博士生）
     </div>
 
-    <!-- 同意核取方塊 -->
     <label class="consent-container" for="consent-check">
       <input type="checkbox" id="consent-check" onchange="toggleConsent(this)">
       <span>我已充分閱讀並同意以上敘述</span>
@@ -81,10 +70,10 @@
     <button id="btn-to-demo" onclick="goToStep('step-demo')" disabled>繼續進行問卷</button>
   </div>
 
-  <!-- 階段二：人口學與觀看習慣資料 -->
+  <!-- 階段二：人口學資料 -->
   <div id="step-demo" class="step">
     <h2>基本資料填寫</h2>
-    <p style="text-align: center; color: #666; margin-top: -5px;">請填寫以下簡單資料以開始測驗</p>
+    <p style="text-align: center; color: #666; margin-top: -5px;">請填寫以下資料以開始測驗</p>
     
     <label>年齡</label>
     <input type="number" id="age" placeholder="例如：24" required>
@@ -101,7 +90,6 @@
     <label>MBTI（若不知道或不願回答，可填「X」）</label>
     <input type="text" id="mbti" placeholder="例如：INTP">
     
-    <!-- 觀看頻率 -->
     <label>你觀看蠟筆小新的頻率</label>
     <select id="watch-freq">
       <option value="">請選擇</option>
@@ -112,12 +100,10 @@
       <option value="幾乎沒看過">幾乎沒看過</option>
     </select>
     
-    <!-- 角色熟悉度 (1~5) -->
-    <label>你對本次出現的 8 位角色的整體熟悉度 (1：完全不熟悉 ~ 5：非常熟悉)</label>
+    <label>你對本次出現角色的整體熟悉度 (1：完全不熟悉 ~ 5：非常熟悉)</label>
     <input type="range" id="familiar-score" min="1" max="5" value="3" oninput="document.getElementById('fam-val').innerText = this.value">
     <div class="range-value"><span id="fam-val">3</span> 分</div>
 
-    <!-- 喜歡程度 (0~5) -->
     <label>你喜歡蠟筆小新這部卡通的程度 (0：完全不喜歡 ~ 5：極度喜歡)</label>
     <input type="range" id="like-score" min="0" max="5" value="3" oninput="document.getElementById('like-val').innerText = this.value">
     <div class="range-value"><span id="like-val">3</span> 分</div>
@@ -125,19 +111,17 @@
     <button onclick="startExperiment()">開始進行 PK 比較 (共 28 題)</button>
   </div>
 
-  <!-- 階段三：2AFC 測驗 (左右圖片排列) -->
+  <!-- 階段三：2AFC 測驗 -->
   <div id="step-task" class="step">
     <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
     <p style="text-align:center; font-size: 15px; color: #d9534f; font-weight: bold;">請點選你【比較討厭】的角色：</p>
     <div style="text-align:center; font-weight:bold; color: #777; margin-bottom: 10px;" id="question-count">1 / 28</div>
     
     <div class="choice-container">
-      <!-- 左邊選項卡片 -->
       <div class="choice-card" onclick="makeChoice(0)">
         <img id="img-left" src="" class="char-img" alt="角色A">
         <div class="char-name" id="btn-left">角色 A</div>
       </div>
-      <!-- 右邊選項卡片 -->
       <div class="choice-card" onclick="makeChoice(1)">
         <img id="img-right" src="" class="char-img" alt="角色B">
         <div class="char-name" id="btn-right">角色 B</div>
@@ -145,40 +129,37 @@
     </div>
   </div>
 
-  <!-- 階段四：結果呈現、長條圖與分項簡答 -->
+  <!-- 階段四：結果與簡答 -->
   <div id="step-result" class="step">
     <h2>你的測試結果</h2>
     
-    <!-- Top 3 前三名 -->
     <div class="rank-box">
       <div class="rank-item" style="color: #d9534f;">🥇 第一名：<span id="top1"></span></div>
       <div class="rank-item" style="color: #e67e22;">🥈 第二名：<span id="top2"></span></div>
       <div class="rank-item" style="color: #f1c40f;">🥉 第三名：<span id="top3"></span></div>
     </div>
 
-    <!-- 長條圖繪製區 -->
     <div class="chart-container">
       <h3 style="text-align: center; margin-bottom: 10px;">討厭指數長條圖 (勝出次數)</h3>
       <canvas id="scoreChart"></canvas>
     </div>
 
-    <!-- 分項簡答題 (選填) -->
     <h3 style="margin-top: 25px; margin-bottom: 5px; color: #d9534f;">簡答題：討厭的原因（選填）</h3>
-    <p style="font-size: 13px; color: #666; margin-top: 0;">可以簡述你討厭他們的特徵或行為（如：外觀、情緒不穩、調皮、背叛、蹭飯、自說自話...）</p>
+    <p style="font-size: 13px; color: #666; margin-top: 0;">可以簡述討厭他們的特徵（如：情緒不穩、蹭飯、調皮...）</p>
 
     <div class="reason-group">
       <label id="lbl-reason1">🥇 討厭第 1 名原因：</label>
-      <input type="text" id="reason1" placeholder="例如：太愛蹭飯、做事不負責任">
+      <input type="text" id="reason1" placeholder="寫下原因...">
     </div>
 
     <div class="reason-group">
       <label id="lbl-reason2">🥈 討厭第 2 名原因：</label>
-      <input type="text" id="reason2" placeholder="例如：情緒暴躁、容易哭鬧">
+      <input type="text" id="reason2" placeholder="寫下原因...">
     </div>
 
     <div class="reason-group">
       <label id="lbl-reason3">🥉 討厭第 3 名原因：</label>
-      <input type="text" id="reason3" placeholder="例如：個性太自傲">
+      <input type="text" id="reason3" placeholder="寫下原因...">
     </div>
     
     <button id="submit-btn" onclick="submitData()">送出並同步結果</button>
@@ -188,29 +169,27 @@
   <div id="step-thanks" class="step" style="text-align: center;">
     <h2>🎉 體驗完成！感謝參與！</h2>
     <div class="intro-box" style="text-align: left; margin-top: 20px;">
-      <b>網頁資料已成功寫入後台！</b><br><br>
-      📸 <b>想分享結果嗎？</b><br>
-      你可以截圖剛才的長條圖結果，發到 Threads 上並 Tag 我（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>）一起討論！<br><br>
-      📅 <b>結果公布預告：</b><br>
-      統計結果與精選討厭理由，將會在<b>一週後</b>於 Threads 發表，記得關注我的動態喔！
+      <b>資料已成功連線寫入後台！</b><br><br>
+      📸 <b>分享結果：</b><br>
+      歡迎截圖剛才的結果圖表，發到 Threads 上並 Tag 我（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>）一起討論！<br><br>
+      📅 <b>報告預告：</b><br>
+      統計與心理距離分析將於<b>一週後</b>在 Threads 發表！
     </div>
   </div>
 
 </div>
 
 <script>
-  // 頁面切換控制
   function goToStep(stepId) {
     document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
     document.getElementById(stepId).classList.add('active');
   }
 
-  // 同意勾選框邏輯
   function toggleConsent(checkbox) {
     document.getElementById('btn-to-demo').disabled = !checkbox.checked;
   }
 
-  // 1. 設定 8 位角色資料（包含圖片路徑）
+  // 1. 角色名單與圖片路徑
   const characterData = [
     { name: "野原銀之介", img: "images/ginnosuke.jpg" },
     { name: "野原美冴", img: "images/misae.jpg" },
@@ -223,12 +202,13 @@
   ];
 
   const characters = characterData.map(c => c.name);
-  
-  // 2. 初始化得分紀錄
   let scores = {};
   characters.forEach(c => scores[c] = 0);
+
+  // 記錄 28 個 Pairwise Choice 結果 (格式: {"角色A vs. 角色B": "選擇的角色"})
+  let pairwiseChoices = {};
   
-  // 3. 建立 C8取2 (28 pairs)
+  // 建立 C8取2
   let pairs = [];
   for (let i = 0; i < characterData.length; i++) {
     for (let j = i + 1; j < characterData.length; j++) {
@@ -236,7 +216,7 @@
     }
   }
   
-  // 4. 洗牌演算法
+  // 洗牌
   pairs.sort(() => Math.random() - 0.5);
   pairs = pairs.map(pair => Math.random() > 0.5 ? [pair[1], pair[0]] : pair);
 
@@ -268,8 +248,16 @@
   }
 
   function makeChoice(selectedIndex) {
+    const charA = pairs[currentTrial][0].name;
+    const charB = pairs[currentTrial][1].name;
     const chosenCharacter = pairs[currentTrial][selectedIndex].name;
+    
+    // 得分加一
     scores[chosenCharacter] += 1;
+
+    // 計算標準化的 Pair Key (確保 Alphabetical 順序以對齊後台欄位)
+    let pairKey = [charA, charB].sort().join(" vs. ");
+    pairwiseChoices[pairKey] = chosenCharacter;
     
     currentTrial++;
     showTrial();
@@ -280,12 +268,10 @@
 
     sortedChars = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
 
-    // 呈現 Top 3 文字
     document.getElementById('top1').innerText = `${sortedChars[0]} (${scores[sortedChars[0]]} 票)`;
     document.getElementById('top2').innerText = `${sortedChars[1]} (${scores[sortedChars[1]]} 票)`;
     document.getElementById('top3').innerText = `${sortedChars[2]} (${scores[sortedChars[2]]} 票)`;
 
-    // 動態更新簡答題 Label
     document.getElementById('lbl-reason1').innerText = `🥇 討厭第 1 名【${sortedChars[0]}】的原因：`;
     document.getElementById('lbl-reason2').innerText = `🥈 討厭第 2 名【${sortedChars[1]}】的原因：`;
     document.getElementById('lbl-reason3').innerText = `🥉 討厭第 3 名【${sortedChars[2]}】的原因：`;
@@ -327,7 +313,6 @@
     });
   }
 
-  // ☁️ 送出數據並同步至 Google Sheet 資料庫
   function submitData() {
     const webAppUrl = "https://script.google.com/macros/s/AKfycbze5QGrmqyd1qqpXMNI33Txx3ibQ-Kz52BPJmp_omujmzG6AVuduVUJwLsVw5MGkhSEeQ/exec";
 
@@ -348,7 +333,7 @@
       reason1: document.getElementById('reason1').value || "無",
       reason2: document.getElementById('reason2').value || "無",
       reason3: document.getElementById('reason3').value || "無",
-      scores: scores
+      pairwiseChoices: pairwiseChoices // 傳送 28 個對照結果
     };
 
     fetch(webAppUrl, {
