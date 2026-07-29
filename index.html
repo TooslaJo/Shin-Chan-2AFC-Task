@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>蠟筆小新最討厭角色 2AFC 測驗</title>
+  <title>蠟筆小新：風起雲湧！討厭角色大擂台</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -48,18 +48,18 @@
   
   <!-- 階段一：指導頁 -->
   <div id="step-intro" class="step active">
-    <h2>蠟筆小新角色討厭排行大擂台</h2>
+    <h2>《蠟筆小新：風起雲湧！討厭角色大擂台》</h2>
     
     <div class="intro-box">
       <b>歡迎各位來到蠟筆小新角色討厭排行大擂台！</b><br><br>
-      本測驗將進行 28 題兩兩 PK，幫你找出內心最討厭的蠟筆小新角色前三名。<br><br>
-      📊 <b>數據預告：</b><br>
-      一週後我會在自己的 Threads 上（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>），發表這份問卷的統計報告與討厭理由分析！<br><br>
-      🛡️ <b>隱私與安全性聲明：</b><br>
-      • 本測驗建置於 <b>GitHub Pages</b> 開放平台，無任何惡意腳本。<br>
-      • 所蒐集之人口學資料僅用於<b>匿名統計與教學分析</b>，無個資外洩風險。<br>
-      • 本測驗非學術研究，僅供娛樂分享與教學用途。<br><br>
-      <b>作者：</b>張良聖（成大心理系博士生）
+      本測驗將進行28題兩兩PK，幫你找出內心最討厭的蠟筆小新角色前三名。填答時間約2~3分鐘。<br><br>
+      📊<b>數據預告：</b><br>
+      大約一週後，我將會在自己的Threads上（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>），發表這份問卷的統計報告與討厭理由分析。<br><br>
+      🛡️<b>隱私與安全性聲明：</b><br>
+      • 本測驗建置於GitHub Pages開放平台，無任何惡意腳本。<br>
+      • 所蒐集之人口學資料，僅用於匿名統計與教學分析，無個資外洩風險。<br>
+      • 本測驗非正式學術研究，僅供社群娛樂分享與統計學教學用途。<br><br>
+      作者：張良聖（國立成功大學心理學系　碩士）
     </div>
 
     <label class="consent-container" for="consent-check">
@@ -100,15 +100,15 @@
       <option value="幾乎沒看過">幾乎沒看過</option>
     </select>
     
-    <label>你對本次出現角色的整體熟悉度 (1：完全不熟悉 ~ 5：非常熟悉)</label>
-    <input type="range" id="familiar-score" min="1" max="5" value="3" oninput="document.getElementById('fam-val').innerText = this.value">
+    <label>你對本次出現角色的整體熟悉度 (0：完全不熟悉 ~ 5：極度熟悉)</label>
+    <input type="range" id="familiar-score" min="0" max="5" value="3" oninput="document.getElementById('fam-val').innerText = this.value">
     <div class="range-value"><span id="fam-val">3</span> 分</div>
 
     <label>你喜歡蠟筆小新這部卡通的程度 (0：完全不喜歡 ~ 5：極度喜歡)</label>
     <input type="range" id="like-score" min="0" max="5" value="3" oninput="document.getElementById('like-val').innerText = this.value">
     <div class="range-value"><span id="like-val">3</span> 分</div>
     
-    <button onclick="startExperiment()">開始進行 PK 比較 (共 28 題)</button>
+    <button onclick="startExperiment()">開始進入PK大擂台！</button>
   </div>
 
   <!-- 階段三：2AFC 測驗 -->
@@ -134,13 +134,13 @@
     <h2>你的測試結果</h2>
     
     <div class="rank-box">
-      <div class="rank-item" style="color: #d9534f;">🥇 第一名：<span id="top1"></span></div>
-      <div class="rank-item" style="color: #e67e22;">🥈 第二名：<span id="top2"></span></div>
-      <div class="rank-item" style="color: #f1c40f;">🥉 第三名：<span id="top3"></span></div>
+      <div class="rank-item" style="color: #d9534f;">🥇第一名：<span id="top1"></span></div>
+      <div class="rank-item" style="color: #e67e22;">🥈第二名：<span id="top2"></span></div>
+      <div class="rank-item" style="color: #f1c40f;">🥉第三名：<span id="top3"></span></div>
     </div>
 
     <div class="chart-container">
-      <h3 style="text-align: center; margin-bottom: 10px;">討厭指數長條圖 (勝出次數)</h3>
+      <h3 style="text-align: center; margin-bottom: 10px;">討厭指數長條圖（勝出次數）</h3>
       <canvas id="scoreChart"></canvas>
     </div>
 
@@ -148,34 +148,38 @@
     <p style="font-size: 13px; color: #666; margin-top: 0;">可以簡述討厭他們的特徵（如：情緒不穩、蹭飯、調皮...）</p>
 
     <div class="reason-group">
-      <label id="lbl-reason1">🥇 討厭第 1 名原因：</label>
+      <label id="lbl-reason1">🥇討厭第1名原因：</label>
       <input type="text" id="reason1" placeholder="寫下原因...">
     </div>
 
     <div class="reason-group">
-      <label id="lbl-reason2">🥈 討厭第 2 名原因：</label>
+      <label id="lbl-reason2">🥈討厭第2名原因：</label>
       <input type="text" id="reason2" placeholder="寫下原因...">
     </div>
 
     <div class="reason-group">
-      <label id="lbl-reason3">🥉 討厭第 3 名原因：</label>
+      <label id="lbl-reason3">🥉討厭第3名原因：</label>
       <input type="text" id="reason3" placeholder="寫下原因...">
     </div>
     
-    <button id="submit-btn" onclick="submitData()">送出並同步結果</button>
+    <button id="submit-btn" onclick="submitData()">送出結果，完成測驗</button>
   </div>
 
   <!-- 階段五：感謝頁 -->
   <div id="step-thanks" class="step" style="text-align: center;">
     <h2>🎉 體驗完成！感謝參與！</h2>
     <div class="intro-box" style="text-align: left; margin-top: 20px;">
-      <b>資料已成功連線寫入後台！</b><br><br>
-      📸 <b>分享結果：</b><br>
-      歡迎截圖剛才的結果圖表，發到 Threads 上並 Tag 我（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>）一起討論！<br><br>
-      📅 <b>報告預告：</b><br>
-      統計分析將於<b>一週後</b>在 Threads 發表！
+      📸分享結果：<br>
+      歡迎截圖剛才的結果，發到Threads上（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>）分享交流！也歡迎Tag我一起討論想法。<br><br>
+      📅報告預告：<br>
+      統計分析與討厭理由整理，將於大約一週後在我的Threads上（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>）發表！<br>
     </div>
   </div>
+
+  <!-- 貼心小按鈕：讓忘記截圖的人可以切回結果頁 -->
+  <button onclick="goToStep('step-result')" style="background: #6c757d; margin-top: 10px; font-size: 16px;">
+    ‹ 返回結果頁查看/截圖
+  </button>
 
 </div>
 
