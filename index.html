@@ -54,7 +54,7 @@
       <b>歡迎各位來到蠟筆小新角色討厭排行大擂台！</b><br><br>
       本測驗將進行 28 題兩兩 PK，幫你找出內心最討厭的蠟筆小新角色前三名。<br><br>
       📊 <b>數據預告：</b><br>
-      一週後我會在自己的 Threads 上（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>），發表這份問卷的統計報告與心理距離分析！<br><br>
+      一週後我會在自己的 Threads 上（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>），發表這份問卷的統計報告與討厭理由分析！<br><br>
       🛡️ <b>隱私與安全性聲明：</b><br>
       • 本測驗建置於 <b>GitHub Pages</b> 開放平台，無任何惡意腳本。<br>
       • 所蒐集之人口學資料僅用於<b>匿名統計與教學分析</b>，無個資外洩風險。<br>
@@ -173,7 +173,7 @@
       📸 <b>分享結果：</b><br>
       歡迎截圖剛才的結果圖表，發到 Threads 上並 Tag 我（<a href="https://www.threads.net/@toosla_jo" target="_blank">@toosla_jo</a>）一起討論！<br><br>
       📅 <b>報告預告：</b><br>
-      統計與心理距離分析將於<b>一週後</b>在 Threads 發表！
+      統計分析將於<b>一週後</b>在 Threads 發表！
     </div>
   </div>
 
@@ -189,25 +189,22 @@
     document.getElementById('btn-to-demo').disabled = !checkbox.checked;
   }
 
-  // 1. 角色名單與圖片路徑
+  // 1. 角色名單與圖片路徑 (圖片副檔名已更新為大寫 .JPG)
   const characterData = [
-    { name: "野原銀之介", img: "images/ginnosuke.jpg" },
-    { name: "野原美冴", img: "images/misae.jpg" },
-    { name: "野原新之助", img: "images/shinnosuke.jpg" },
-    { name: "佐藤正男", img: "images/masao.jpg" },
-    { name: "鳩谷蜜琪&鳩谷席林", img: "images/micchi_yoshin.jpg" },
-    { name: "四郎", img: "images/shirou.jpg" },
-    { name: "櫻田妮妮", img: "images/nene.jpg" },
-    { name: "酢乙女愛", img: "images/ai.jpg" }
+    { name: "野原銀之介", img: "images/ginnosuke.JPG" },
+    { name: "野原美冴", img: "images/misae.JPG" },
+    { name: "野原新之助", img: "images/shinnosuke.JPG" },
+    { name: "佐藤正男", img: "images/masao.JPG" },
+    { name: "鳩谷蜜琪&鳩谷席林", img: "images/micchi_yoshin.JPG" },
+    { name: "四郎", img: "images/shirou.JPG" },
+    { name: "櫻田妮妮", img: "images/nene.JPG" },
+    { name: "酢乙女愛", img: "images/ai.JPG" }
   ];
 
   const characters = characterData.map(c => c.name);
   let scores = {};
   characters.forEach(c => scores[c] = 0);
 
-  // 記錄 28 個 Pairwise Choice 結果 (格式: {"角色A vs. 角色B": "選擇的角色"})
-  let pairwiseChoices = {};
-  
   // 建立 C8取2
   let pairs = [];
   for (let i = 0; i < characterData.length; i++) {
@@ -248,16 +245,8 @@
   }
 
   function makeChoice(selectedIndex) {
-    const charA = pairs[currentTrial][0].name;
-    const charB = pairs[currentTrial][1].name;
     const chosenCharacter = pairs[currentTrial][selectedIndex].name;
-    
-    // 得分加一
     scores[chosenCharacter] += 1;
-
-    // 計算標準化的 Pair Key (確保 Alphabetical 順序以對齊後台欄位)
-    let pairKey = [charA, charB].sort().join(" vs. ");
-    pairwiseChoices[pairKey] = chosenCharacter;
     
     currentTrial++;
     showTrial();
@@ -333,7 +322,7 @@
       reason1: document.getElementById('reason1').value || "無",
       reason2: document.getElementById('reason2').value || "無",
       reason3: document.getElementById('reason3').value || "無",
-      pairwiseChoices: pairwiseChoices // 傳送 28 個對照結果
+      scores: scores
     };
 
     fetch(webAppUrl, {
